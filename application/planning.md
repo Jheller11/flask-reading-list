@@ -15,3 +15,7 @@
 5. tags
 6. author_id (foreign key)
 7. id
+
+### Tasks
+
+1. Article create method based solely on url in reading_list.py
