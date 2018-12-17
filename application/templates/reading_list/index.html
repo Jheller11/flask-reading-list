@@ -20,7 +20,9 @@
     >
     {% endif %}
   </header>
-  <p class="body">{{ article['body'] }}</p>
+  <p class="url">
+    <a href="{{ article['url'] }}">{{ article['url'] }}</a>
+  </p>
 </article>
 {% if not loop.last %}
 <hr />

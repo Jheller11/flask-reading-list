@@ -25,23 +25,76 @@ def index():
 def create():
     # change this to automatically find article details
     if request.method == 'POST':
-        title = request.form['title']
-        body = request.form['body']
+        url = request.form['url']
         error = None
 
-        if not title:
-            error = 'Title is required.'
+        if not url:
+            error = 'URL is required.'
 
         if error is not None:
             flash(error)
         else:
             db = get_db()
             db.execute(
-                'INSERT INTO post (title, body, author_id)'
-                ' VALUES (?, ?, ?)',
-                (title, body, g.user['id'])
+                'INSERT INTO list_item (url, author_id)'
+                ' VALUES (?, ?)',
+                (url, g.user['id'])
             )
             db.commit()
             return redirect(url_for('reading_list.index'))
 
     return render_template('reading_list/create.html')
+
+
+def get_article(id, check_author=True):
+    article = get_db().execute(
+        'SELECT p.id, title, created, author_id, url, read, username'
+        ' FROM list_item p JOIN user u ON p.author_id = u.id'
+        ' WHERE p.id = ?',
+        (id,)
+    ).fetchone()
+
+    if article is None:
+        abort(404, "Article id {0} doesn't exist.".format(id))
+
+    if check_author and article['author_id'] != g.user['id']:
+        abort(403)
+
+    return article
+
+
+@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+@login_required
+def update(id):
+    article = get_article(id)
+
+    if request.method == 'POST':
+        url = request.form['url']
+        error = None
+
+        if not url:
+            error = 'URL is required.'
+
+        if error is not None:
+            flash(error)
+        else:
+            db = get_db()
+            db.execute(
+                'UPDATE list_item SET url = ?'
+                ' WHERE id = ?',
+                (url, id)
+            )
+            db.commit()
+            return redirect(url_for('reading_list.index'))
+
+    return render_template('reading_list/update.html', article=article)
+
+
+@bp.route('/<int:id>/delete', methods=('POST',))
+@login_required
+def delete(id):
+    get_article(id)
+    db = get_db()
+    db.execute('DELETE FROM list_item WHERE id = ?', (id,))
+    db.commit()
+    return redirect(url_for('reading_list.index'))

@@ -1,0 +1,26 @@
+{% extends 'base.html' %} {% block header %}
+<h1>{% block title %}Edit "{{ article['title'] }}"{% endblock %}</h1>
+{% endblock %} {% block content %}
+<form method="post">
+  <label for="url">URL</label>
+  <input
+    name="url"
+    id="url"
+    value="{{ request.form['url'] or article['url'] }}"
+    required
+  />
+  <input type="submit" value="Save" />
+</form>
+<hr />
+<form
+  action="{{ url_for('reading_list.delete', id=article['id']) }}"
+  method="post"
+>
+  <input
+    class="danger"
+    type="submit"
+    value="Delete"
+    onclick="return confirm('Are you sure?');"
+  />
+</form>
+{% endblock %}
