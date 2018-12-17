@@ -5,6 +5,7 @@ from werkzeug.exceptions import abort
 
 from application.auth import login_required
 from application.db import get_db
+from application.utils import get_data
 
 bp = Blueprint('reading_list', __name__, url_prefix='/reading_list')
 
@@ -26,6 +27,7 @@ def create():
     # change this to automatically find article details
     if request.method == 'POST':
         url = request.form['url']
+        data = get_data(url)
         error = None
 
         if not url:
@@ -36,9 +38,9 @@ def create():
         else:
             db = get_db()
             db.execute(
-                'INSERT INTO list_item (url, author_id)'
-                ' VALUES (?, ?)',
-                (url, g.user['id'])
+                'INSERT INTO list_item (url, title, author_id)'
+                ' VALUES (?, ?, ?)',
+                (url, data['title'], g.user['id'])
             )
             db.commit()
             return redirect(url_for('reading_list.index'))
@@ -70,6 +72,7 @@ def update(id):
 
     if request.method == 'POST':
         url = request.form['url']
+        data = get_data(url)
         error = None
 
         if not url:
@@ -80,9 +83,9 @@ def update(id):
         else:
             db = get_db()
             db.execute(
-                'UPDATE list_item SET url = ?'
+                'UPDATE list_item SET url = ?, title = ?'
                 ' WHERE id = ?',
-                (url, id)
+                (url, data['title'], id)
             )
             db.commit()
             return redirect(url_for('reading_list.index'))

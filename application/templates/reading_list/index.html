@@ -23,7 +23,8 @@
   <p class="url">
     <a href="{{ article['url'] }}">{{ article['url'] }}</a>
   </p>
+  <p class="read">
+    {% if article['read'] %} read {% else %} unread {% endif %}
+  </p>
 </article>
-{% if not loop.last %}
-<hr />
-{% endif %} {% endfor %} {% endblock %}
+{% endfor %} {% endblock %}
